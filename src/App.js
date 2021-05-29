@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   LineChart,
+  AreaChart,
+  Area,
   Line,
   XAxis,
   YAxis,
@@ -10,9 +12,12 @@ import {
   Legend,
   Label,
 } from "recharts";
+import { format, parseISO } from "date-fns";
 
 import "./App.css";
 import "./index.css";
+import sack from "./assets/sack.png";
+import sock from "./assets/socks.png";
 
 function App() {
   const [sacks, setSacks] = useState({
@@ -33,12 +38,6 @@ function App() {
   });
 
   const [graphData, setGraphData] = useState([]);
-
-  function roundMinutes(date) {
-    date.setHours(date.getHours() + Math.round(date.getMinutes() / 60));
-    date.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
-    return date;
-  }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(async () => {
@@ -84,6 +83,21 @@ function App() {
         }
       });
     });
+
+    // fix first and last data points
+    graph[graph.length - 1].socks = socks.fully_diluted_valuation.usd;
+    graph[graph.length - 1].sacks = sacks.fully_diluted_valuation.usd;
+    graph[0].socks = 18000000;
+    graph[0].percent = 0.135;
+
+    for (let i = 0; i < graph.length; i++) {
+      if (graph[i].socks && graph[i].sacks) {
+        graph[i] = {
+          ...graph[i],
+          percent: graph[i].sacks / graph[i].socks,
+        };
+      }
+    }
     setGraphData(graph);
 
     let graphFetchResults = await graphFetch();
@@ -168,7 +182,7 @@ function App() {
     `,
       }
     );
-    console.log(socksGraphResults.data.data);
+
     return [sacksGraphResults.data.data, socksGraphResults.data.data];
   };
 
@@ -199,13 +213,28 @@ function App() {
     return [sacksResults.data.market_caps, socksResults.data.market_caps];
   };
 
+  var formatterPrice = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
   var formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+    maximumFractionDigits: 1,
   });
 
   let lineChart = (
     <LineChart data={graphData}>
+      <Line
+        type="basis"
+        dataKey="sacks"
+        stroke="#785ecd"
+        dot={false}
+        activeDot={true}
+        strokeWidth={4}
+        tickFormatter={(number) => `$${number}`}
+      />
       <Line
         type="basis"
         dataKey="socks"
@@ -216,19 +245,16 @@ function App() {
         tickFormatter={(number) => `$${number}`}
         connectNulls
       />
-      <Line
-        type="basis"
-        dataKey="sacks"
-        stroke="#785ecd"
-        dot={false}
-        activeDot={true}
-        strokeWidth={4}
-        tickFormatter={(number) => `$${number}`}
-      />
       <XAxis
         dataKey="date"
-        interval={12}
-        tickFormatter={(str) => String(str).substring(0, 10)}
+        interval={24}
+        tickFormatter={(str) => {
+          if (str !== 0) {
+            const date = parseISO(String(str).substring(0, 10));
+            return format(date, "M/d");
+          }
+          return "error";
+        }}
       />
 
       <YAxis
@@ -244,7 +270,6 @@ function App() {
         ></Label>
       </YAxis>
       <Tooltip content={<CustomTooltip></CustomTooltip>} />
-      {/* <Tooltip /> */}
       <Legend />
     </LineChart>
   );
@@ -253,11 +278,13 @@ function App() {
     if (active && payload && label) {
       return (
         <div className="p-4 bg-white">
-          <h4>{label.substring(0, 10) + ` ${label.substring(12)}:00`}</h4>
+          <h4>
+            {format(parseISO(String(label).substring(0, 10)), "MMM dd yyyy")}
+          </h4>
+
           {payload[0] && payload[0].value ? (
             <p style={{ color: payload[0].color }}>
               {payload[0].name}: ${(payload[0].value / 1000000).toFixed(1)}M{" "}
-              {/* {JSON.stringify(payload[0])} */}
             </p>
           ) : null}
           {payload[1] && payload[1].value ? (
@@ -286,36 +313,134 @@ function App() {
           </ResponsiveContainer>
         </div>
         <div className="mt-5 flex justify-around">
-          <div className="pt-3 px-3 h-80 w-5/12 bg-gray-300 flex flex-col">
+          <div className="pt-3 px-3 w-5/12 bg-gray-300 flex flex-col">
             <h2 className="mb-2 text-center font-bold text-2xl">$SACKS</h2>
-            <p>Price/token: {formatter.format(sacks.usd)}</p>
-            <p>Market Cap: {formatter.format(sacks.mcap / 1000000)}M</p>
-            <p>24h Volume: {formatter.format(sacks.oneDayVolume)}</p>
-            <p>
-              Total Volume: {formatter.format(sacks.totalVolume / 1000000)}M
-            </p>
+            <div className="flex ml-10">
+              <p className="w-1/2 ">Price/token:</p>
+              <p className="ml-2">{formatterPrice.format(sacks.usd)}</p>
+            </div>
+            <div className="flex ml-10">
+              <p className="w-1/2">Market Cap: </p>
+              <p className="ml-2">{formatter.format(sacks.mcap / 1000000)}M</p>
+            </div>
+            <div className="flex ml-10">
+              <p className="w-1/2">24h Volume: </p>
+              <p className="ml-2">
+                {formatterPrice.format(sacks.oneDayVolume)}
+              </p>
+            </div>
+            <div className="flex ml-10">
+              <p className="w-1/2">Total Volume: </p>
+              <p className="ml-2">
+                {formatter.format(sacks.totalVolume / 1000000)}M
+              </p>
+            </div>
+            <img className="my-2 h-32 w-32 mx-auto" src={sack} alt="sack" />
             <a
               className="pb-2 underline text-sm mt-auto text-center"
               href="https://info.uniswap.org/#/tokens/0xa6610ed604047e7b76c1da288172d15bcda57596"
             >
-              View liquidity pool on Uniswap
+              View token on Uniswap
             </a>
           </div>
-          <div className="pt-3 px-3 h-80 w-5/12 bg-gray-300 flex flex-col">
+          <div className="pt-3 px-3 w-5/12 bg-gray-300 flex flex-col">
             <h2 className="mb-2 text-center font-bold text-2xl">$SOCKS</h2>
-            <p>Price/token: {formatter.format(socks.usd)}</p>
-            <p>Market Cap: {formatter.format(socks.mcap / 1000000)}M</p>
-            <p>24h Volume: {formatter.format(socks.oneDayVolume)}</p>
-            <p>
-              Total Volume: {formatter.format(socks.totalVolume / 1000000)}M
-            </p>
-            <a className="pb-2 underline text-sm mt-auto text-center" href="#">
-              View liquidity pool on Uniswap
+            <div className="flex ml-10">
+              <p className="w-1/2 ">Price/token:</p>
+              <p className="ml-2">{formatterPrice.format(socks.usd)}</p>
+            </div>
+            <div className="flex ml-10">
+              <p className="w-1/2">Market Cap: </p>
+              <p className="ml-2">{formatter.format(socks.mcap / 1000000)}M</p>
+            </div>
+            <div className="flex ml-10">
+              <p className="w-1/2">24h Volume: </p>
+              <p className="ml-2">
+                {formatterPrice.format(socks.oneDayVolume)}
+              </p>
+            </div>
+            <div className="flex ml-10">
+              <p className="w-1/2">Total Volume: </p>
+              <p className="ml-2">
+                {formatter.format(socks.totalVolume / 1000000)}M
+              </p>
+            </div>
+            <img className="my-2 h-32 w-32 mx-auto" src={sock} alt="socks" />
+            <a
+              className="pb-2 underline text-sm mt-auto text-center"
+              href="https://info.uniswap.org/#/tokens/0x23b608675a2b2fb1890d3abbd85c5775c51691d5"
+            >
+              View token on Uniswap
             </a>
           </div>
         </div>
-        <div className="mt-5 h-96 w-full bg-gray-500 flex justify-center items-center">
-          Flippening % Chart
+        <div className="mt-8 h-96 w-full flex justify-center items-center">
+          <ResponsiveContainer>
+            <AreaChart data={graphData}>
+              <defs>
+                <linearGradient
+                  id="colorFlippening"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor="#785ecd" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#785ecd" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area
+                type="basis"
+                dataKey="percent"
+                stroke="#785ecd"
+                dot={false}
+                activeDot={true}
+                strokeWidth={4}
+                tickFormatter={(number) => `$${number}`}
+                connectNulls
+                fillOpacity={1}
+                fill="url(#colorFlippening)"
+              />
+              <YAxis
+                dataKey="percent"
+                width={100}
+                domain={[0, 1]}
+                tickFormatter={(number) => `${number.toFixed(2) * 100}%`}
+              >
+                <Label
+                  value="% to Flippening"
+                  angle={-90}
+                  position="outsideLeft"
+                  dx={-30}
+                ></Label>
+              </YAxis>
+              <XAxis
+                dataKey="date"
+                interval={24}
+                tickFormatter={(str) => {
+                  if (str !== 0) {
+                    const date = parseISO(String(str).substring(0, 10));
+                    return format(date, "M/d");
+                  }
+                  return "error";
+                }}
+              ></XAxis>
+              <Tooltip
+                labelFormatter={(label) => {
+                  console.log(label);
+                  if (label !== 0) {
+                    return format(
+                      parseISO(String(label).substring(0, 10)),
+                      "MMM dd yyyy"
+                    );
+                  }
+                  return "error";
+                }}
+                formatter={(number) => `${(number * 100).toFixed(2)}%`}
+              />
+              <Legend />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </main>
       <footer className="text-center py-2 mt-auto">
@@ -323,11 +448,11 @@ function App() {
         <a className="underline" href="https://twitter.com/DMSchlabach">
           Daniel Schlabach
         </a>{" "}
-        using{" "}
+        using data from{" "}
         <a className="underline" href="https://coingecko.com">
           CoinGecko
-        </a>
-        .
+        </a>{" "}
+        and Uniswap.
       </footer>
     </div>
   );
