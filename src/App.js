@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   Legend,
+  Label,
 } from "recharts";
 
 import "./App.css";
@@ -18,14 +19,16 @@ function App() {
     usd: 0,
     mcap: 0,
     eth: 0,
-    totalVolume: 0,
+    oneDayVolume: 0,
+    sevenDayVolume: 0,
     holders: 0,
   });
   const [socks, setSocks] = useState({
     usd: 0,
     mcap: 0,
     eth: 0,
-    totalVolume: 0,
+    oneDayVolume: 0,
+    sevenDayVolume: 0,
     holders: 0,
   });
 
@@ -40,19 +43,6 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(async () => {
     let { socks, sacks } = await fetchData();
-
-    setSacks({
-      ...sacks,
-      usd: sacks.current_price.usd,
-      mcap: sacks.fully_diluted_valuation.usd,
-      totalVolume: sacks.total_volume.usd,
-    });
-    setSocks({
-      ...socks,
-      usd: socks.current_price.usd,
-      mcap: socks.fully_diluted_valuation.usd,
-      totalVolume: socks.total_volume.usd,
-    });
 
     let graph = [];
     let history = await fetchHistoricalData();
@@ -74,7 +64,7 @@ function App() {
         date: date,
       });
     }
-    console.log(graph);
+
     sacksHistory.forEach((x, index) => {
       let date = new Date(x[0]).toISOString().substr(0, 13);
 
@@ -85,10 +75,8 @@ function App() {
         }
       });
     });
-
     socksHistory.forEach((x, index) => {
       let date = new Date(x[0]).toISOString().substr(0, 13);
-      console.log(date, index);
       let obj = graph.find((o, i) => {
         if (o.date === date) {
           graph[i] = { ...graph[i], socks: Number(x[1].toFixed(2)) };
@@ -96,9 +84,93 @@ function App() {
         }
       });
     });
-
     setGraphData(graph);
+
+    let graphFetchResults = await graphFetch();
+
+    setSacks({
+      ...sacks,
+      usd: sacks.current_price.usd,
+      mcap: sacks.fully_diluted_valuation.usd,
+      totalVolume:
+        parseInt(graphFetchResults[0].pools[0].volumeUSD) +
+        parseInt(graphFetchResults[0].pools[1].volumeUSD),
+      oneDayVolume: parseInt(
+        graphFetchResults[0].tokenDayDatas[
+          graphFetchResults[0].tokenDayDatas.length - 1
+        ].volumeUSD
+      ),
+    });
+
+    setSocks({
+      ...socks,
+      usd: socks.current_price.usd,
+      mcap: socks.fully_diluted_valuation.usd,
+      totalVolume:
+        parseInt(graphFetchResults[1].pools[0].volumeUSD) +
+        parseInt(graphFetchResults[1].pools[1].volumeUSD),
+      oneDayVolume: parseInt(
+        graphFetchResults[1].tokenDayDatas[
+          graphFetchResults[1].tokenDayDatas.length - 1
+        ].volumeUSD
+      ),
+    });
   }, []);
+
+  const graphFetch = async () => {
+    const sacksGraphResults = await axios.post(
+      "https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-testing",
+      {
+        query: `{pools (where:{token0:"0xa6610ed604047e7b76c1da288172d15bcda57596"}) {
+
+      id
+      volumeUSD
+      token0Price
+      token0 {
+        name
+      }
+      token1 {
+        name
+      }
+    }
+      
+      tokenDayDatas (where:{ token:"0xa6610ed604047e7b76c1da288172d15bcda57596"}){
+      date
+        volumeUSD
+        priceUSD
+    } 
+    }
+    `,
+      }
+    );
+    const socksGraphResults = await axios.post(
+      "https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-testing",
+      {
+        query: `{pools (where:{token0:"0x23b608675a2b2fb1890d3abbd85c5775c51691d5"}) {
+
+      id
+      volumeUSD
+      token0Price
+      token0 {
+        name
+      }
+      token1 {
+        name
+      }
+    }
+      
+      tokenDayDatas (where:{ token:"0x23b608675a2b2fb1890d3abbd85c5775c51691d5"}){
+      date
+        volumeUSD
+        priceUSD
+    } 
+    }
+    `,
+      }
+    );
+    console.log(socksGraphResults.data.data);
+    return [sacksGraphResults.data.data, socksGraphResults.data.data];
+  };
 
   const fetchData = async () => {
     const sacksResults = await axios.get(
@@ -162,9 +234,15 @@ function App() {
       <YAxis
         dataKey="socks"
         width={100}
-        tickFormatter={(number) => `$${number.toFixed(2) / 100000}M`}
-        label={{ value: "Market Cap ($M)", angle: -90, position: "center" }}
-      ></YAxis>
+        tickFormatter={(number) => `$${number.toFixed(2) / 1000000}M`}
+      >
+        <Label
+          value="Market Cap ($M)"
+          angle={-90}
+          position="outsideLeft"
+          dx={-30}
+        ></Label>
+      </YAxis>
       <Tooltip content={<CustomTooltip></CustomTooltip>} />
       {/* <Tooltip /> */}
       <Legend />
@@ -172,19 +250,19 @@ function App() {
   );
 
   function CustomTooltip({ active, payload, label }) {
-    if (active) {
+    if (active && payload && label) {
       return (
         <div className="p-4 bg-white">
-          <h4>{label.substring(0, 10)}</h4>
+          <h4>{label.substring(0, 10) + ` ${label.substring(12)}:00`}</h4>
           {payload[0] && payload[0].value ? (
             <p style={{ color: payload[0].color }}>
-              {payload[0].name}: ${(payload[0].value / 100000).toFixed(1)}M{" "}
+              {payload[0].name}: ${(payload[0].value / 1000000).toFixed(1)}M{" "}
               {/* {JSON.stringify(payload[0])} */}
             </p>
           ) : null}
           {payload[1] && payload[1].value ? (
             <p style={{ color: payload[1].color }}>
-              {payload[1].name}: ${(payload[1].value / 100000).toFixed(1)}M{" "}
+              {payload[1].name}: ${(payload[1].value / 1000000).toFixed(1)}M{" "}
             </p>
           ) : null}
         </div>
@@ -202,30 +280,36 @@ function App() {
           market cap?
         </p>
 
-        <div className="mt-5 h-96 w-full border-black border">
+        <div className="mt-5 h-96 w-full ">
           <ResponsiveContainer width="100%" height="100%">
             {lineChart}
           </ResponsiveContainer>
         </div>
-        <div className="mt-5 flex justify-between">
-          <div className="pt-3 px-3 h-80 bg-gray-400">
-            <h2 className="text-center font-bold text-xl">$SACKS</h2>
+        <div className="mt-5 flex justify-around">
+          <div className="pt-3 px-3 h-80 w-5/12 bg-gray-300 flex flex-col">
+            <h2 className="mb-2 text-center font-bold text-2xl">$SACKS</h2>
             <p>Price/token: {formatter.format(sacks.usd)}</p>
-            <p>Market Cap: {formatter.format(sacks.mcap)}</p>
-            <p>24h Trading Volume: {formatter.format(sacks.totalVolume)}</p>
+            <p>Market Cap: {formatter.format(sacks.mcap / 1000000)}M</p>
+            <p>24h Volume: {formatter.format(sacks.oneDayVolume)}</p>
+            <p>
+              Total Volume: {formatter.format(sacks.totalVolume / 1000000)}M
+            </p>
             <a
-              className="underline text-sm"
+              className="pb-2 underline text-sm mt-auto text-center"
               href="https://info.uniswap.org/#/tokens/0xa6610ed604047e7b76c1da288172d15bcda57596"
             >
               View liquidity pool on Uniswap
             </a>
           </div>
-          <div className="pt-3 px-3 h-80 bg-gray-400">
-            <h2 className="text-center font-bold text-xl">$SOCKS</h2>
+          <div className="pt-3 px-3 h-80 w-5/12 bg-gray-300 flex flex-col">
+            <h2 className="mb-2 text-center font-bold text-2xl">$SOCKS</h2>
             <p>Price/token: {formatter.format(socks.usd)}</p>
-            <p>Market Cap: {formatter.format(socks.mcap)}</p>
-            <p>24h Trading Volume: {formatter.format(socks.totalVolume)}</p>
-            <a className="underline text-sm" href="#">
+            <p>Market Cap: {formatter.format(socks.mcap / 1000000)}M</p>
+            <p>24h Volume: {formatter.format(socks.oneDayVolume)}</p>
+            <p>
+              Total Volume: {formatter.format(socks.totalVolume / 1000000)}M
+            </p>
+            <a className="pb-2 underline text-sm mt-auto text-center" href="#">
               View liquidity pool on Uniswap
             </a>
           </div>
