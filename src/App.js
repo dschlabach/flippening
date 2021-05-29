@@ -259,7 +259,7 @@ function App() {
 
       <YAxis
         dataKey="socks"
-        width={100}
+        width={75}
         tickFormatter={(number) => `$${number.toFixed(2) / 1000000}M`}
       >
         <Label
@@ -312,8 +312,8 @@ function App() {
             {lineChart}
           </ResponsiveContainer>
         </div>
-        <div className="mt-5 flex justify-around">
-          <div className="pt-3 px-3 w-5/12 bg-gray-300 flex flex-col">
+        <div className="mt-5 flex flex-wrap sm:flex-no-wrap justify-around">
+          <div className="pt-3 px-3 w-full sm:w-5/12 bg-gray-300 flex flex-col">
             <h2 className="mb-2 text-center font-bold text-2xl">$SACKS</h2>
             <div className="flex ml-10">
               <p className="w-1/2 ">Price/token:</p>
@@ -337,13 +337,13 @@ function App() {
             </div>
             <img className="my-2 h-32 w-32 mx-auto" src={sack} alt="sack" />
             <a
-              className="pb-2 underline text-sm mt-auto text-center"
+              className="pb-4 underline text-sm mt-auto text-center"
               href="https://info.uniswap.org/#/tokens/0xa6610ed604047e7b76c1da288172d15bcda57596"
             >
               View token on Uniswap
             </a>
           </div>
-          <div className="pt-3 px-3 w-5/12 bg-gray-300 flex flex-col">
+          <div className="pt-3 px-3 w-full sm:w-5/12 bg-gray-300 flex flex-col mt-5 sm:mt-0">
             <h2 className="mb-2 text-center font-bold text-2xl">$SOCKS</h2>
             <div className="flex ml-10">
               <p className="w-1/2 ">Price/token:</p>
@@ -367,7 +367,7 @@ function App() {
             </div>
             <img className="my-2 h-32 w-32 mx-auto" src={sock} alt="socks" />
             <a
-              className="pb-2 underline text-sm mt-auto text-center"
+              className="pb-4 underline text-sm mt-auto text-center"
               href="https://info.uniswap.org/#/tokens/0x23b608675a2b2fb1890d3abbd85c5775c51691d5"
             >
               View token on Uniswap
@@ -403,7 +403,7 @@ function App() {
               />
               <YAxis
                 dataKey="percent"
-                width={100}
+                width={75}
                 domain={[0, 1]}
                 tickFormatter={(number) => `${number.toFixed(2) * 100}%`}
               >
