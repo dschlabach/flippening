@@ -37,7 +37,218 @@ function App() {
     holders: 0,
   });
 
-  const [graphData, setGraphData] = useState([]);
+  const [graphData, setGraphData] = useState([
+    {
+      date: "2021-05-28T17",
+      sacks: 2820499.58,
+      socks: 18000000,
+      percent: 0.15669442111111112,
+    },
+    {
+      date: "2021-05-28T18",
+      sacks: 2657410.3,
+    },
+    {
+      date: "2021-05-28T19",
+      sacks: 2745819.57,
+      socks: 18093087.16,
+      percent: 0.15176069985836513,
+    },
+    {
+      date: "2021-05-28T20",
+      sacks: 2468301.62,
+      socks: 17625722.04,
+      percent: 0.14003974500439814,
+    },
+    {
+      date: "2021-05-28T21",
+      sacks: 2402850.19,
+      socks: 17625722.04,
+      percent: 0.1363263408186596,
+    },
+    {
+      date: "2021-05-28T22",
+      sacks: 2307438.42,
+      socks: 17268563.56,
+      percent: 0.13362075032950801,
+    },
+    {
+      date: "2021-05-28T23",
+      sacks: 2329835.3,
+    },
+    {
+      date: "2021-05-29T00",
+      sacks: 2296546.88,
+      socks: 17623494.76,
+      percent: 0.13031166129503816,
+    },
+    {
+      date: "2021-05-29T01",
+      sacks: 2311364.16,
+      socks: 18319348.34,
+      percent: 0.12617065395023763,
+    },
+    {
+      date: "2021-05-29T02",
+      sacks: 2435701.11,
+    },
+    {
+      date: "2021-05-29T03",
+      sacks: 2427851.19,
+    },
+    {
+      date: "2021-05-29T04",
+      sacks: 2436990.45,
+    },
+    {
+      date: "2021-05-29T05",
+      sacks: 2436676.38,
+    },
+    {
+      date: "2021-05-29T06",
+      sacks: 2470004.22,
+    },
+    {
+      date: "2021-05-29T07",
+      sacks: 2258721.34,
+    },
+    {
+      date: "2021-05-29T08",
+      sacks: 2435938.28,
+      socks: 18347547.98,
+      percent: 0.1327664210310461,
+    },
+    {
+      date: "2021-05-29T09",
+      sacks: 2403507.06,
+      socks: 18347547.98,
+      percent: 0.13099881589736004,
+    },
+    {
+      date: "2021-05-29T10",
+      sacks: 2398934.8,
+    },
+    {
+      date: "2021-05-29T11",
+      sacks: 2413212.69,
+    },
+    {
+      date: "2021-05-29T12",
+      sacks: 2444692.52,
+      socks: 17719316.47,
+      percent: 0.1379676537827534,
+    },
+    {
+      date: "2021-05-29T13",
+      sacks: 2386123.21,
+    },
+    {
+      date: "2021-05-29T14",
+      sacks: 2376245.24,
+    },
+    {
+      date: "2021-05-29T15",
+      sacks: 2297495.03,
+      socks: 17852185.22,
+      percent: 0.1286954510995153,
+    },
+    {
+      date: "2021-05-29T16",
+      sacks: 2275348.25,
+      socks: 17043536.81,
+      percent: 0.13350211727562197,
+    },
+    {
+      date: "2021-05-29T17",
+      sacks: 2072442.71,
+    },
+    {
+      date: "2021-05-29T18",
+      sacks: 2097198.65,
+    },
+    {
+      date: "2021-05-29T19",
+      sacks: 2061281.44,
+    },
+    {
+      date: "2021-05-29T20",
+      sacks: 2044421.47,
+    },
+    {
+      date: "2021-05-29T21",
+      sacks: 2027186.73,
+      socks: 16589286.08,
+      percent: 0.1221985515364625,
+    },
+    {
+      date: "2021-05-29T22",
+      sacks: 2004497.85,
+      socks: 16181694.24,
+      percent: 0.12387441143493019,
+    },
+    {
+      date: "2021-05-29T23",
+      sacks: 1987530.86,
+    },
+    {
+      date: "2021-05-30T00",
+      sacks: 1955642.94,
+      socks: 15986531.44,
+      percent: 0.12233065986451405,
+    },
+    {
+      date: "2021-05-30T01",
+      sacks: 1872961.31,
+      socks: 15882113.82,
+      percent: 0.117928969104945,
+    },
+    {
+      date: "2021-05-30T02",
+      sacks: 1862327.97,
+    },
+    {
+      date: "2021-05-30T03",
+      sacks: 1910178.69,
+    },
+    {
+      date: "2021-05-30T04",
+      sacks: 1995440.02,
+    },
+    {
+      date: "2021-05-30T05",
+      sacks: 1950946.51,
+    },
+    {
+      date: "2021-05-30T06",
+      sacks: 2026762.51,
+      socks: 17014720.73,
+      percent: 0.11911817667547459,
+    },
+    {
+      date: "2021-05-30T07",
+      sacks: 2086198.53,
+    },
+    {
+      date: "2021-05-30T08",
+      sacks: 2024702.34,
+    },
+    {
+      date: "2021-05-30T09",
+      sacks: 2019382.64,
+      socks: 17014720.73,
+      percent: 0.1186844422570784,
+    },
+    {
+      date: "2021-05-30T10",
+      sacks: 2094462.57,
+    },
+    {
+      date: "2021-05-30T11",
+      sacks: 1997164,
+      socks: 17494376,
+      percent: 0.11416034501602115,
+    },
+  ]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(async () => {
@@ -98,6 +309,7 @@ function App() {
         };
       }
     }
+
     setGraphData(graph);
 
     let graphFetchResults = await graphFetch();
@@ -227,6 +439,7 @@ function App() {
   let lineChart = (
     <LineChart data={graphData}>
       <Line
+        isAnimationActive={false}
         type="basis"
         dataKey="sacks"
         stroke="#785ecd"
@@ -236,6 +449,7 @@ function App() {
         tickFormatter={(number) => `$${number}`}
       />
       <Line
+        isAnimationActive={false}
         type="basis"
         dataKey="socks"
         stroke="#FF007A"
@@ -428,7 +642,6 @@ function App() {
               ></XAxis>
               <Tooltip
                 labelFormatter={(label) => {
-                  console.log(label);
                   if (label !== 0) {
                     return format(
                       parseISO(String(label).substring(0, 10)),
