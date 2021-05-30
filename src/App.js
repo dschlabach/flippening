@@ -335,6 +335,7 @@ function App() {
                 {formatter.format(sacks.totalVolume / 1000000)}M
               </p>
             </div>
+
             <img className="my-2 h-32 w-32 mx-auto" src={sack} alt="sack" />
             <a
               className="pb-4 underline text-sm mt-auto text-center"
