@@ -439,7 +439,6 @@ function App() {
   let lineChart = (
     <LineChart data={graphData}>
       <Line
-        isAnimationActive={false}
         type="basis"
         dataKey="sacks"
         stroke="#785ecd"
@@ -449,7 +448,6 @@ function App() {
         tickFormatter={(number) => `$${number}`}
       />
       <Line
-        isAnimationActive={false}
         type="basis"
         dataKey="socks"
         stroke="#FF007A"
@@ -543,12 +541,12 @@ function App() {
                 {formatterPrice.format(sacks.oneDayVolume)}
               </p>
             </div>
-            <div className="flex ml-10">
+            {/* <div className="flex ml-10">
               <p className="w-1/2">Total Volume: </p>
               <p className="ml-2">
                 {formatter.format(sacks.totalVolume / 1000000)}M
               </p>
-            </div>
+            </div> */}
 
             <img className="my-2 h-32 w-32 mx-auto" src={sack} alt="sack" />
             <a
@@ -574,12 +572,12 @@ function App() {
                 {formatterPrice.format(socks.oneDayVolume)}
               </p>
             </div>
-            <div className="flex ml-10">
+            {/* <div className="flex ml-10">
               <p className="w-1/2">Total Volume: </p>
               <p className="ml-2">
                 {formatter.format(socks.totalVolume / 1000000)}M
               </p>
-            </div>
+            </div> */}
             <img className="my-2 h-32 w-32 mx-auto" src={sock} alt="socks" />
             <a
               className="pb-4 underline text-sm mt-auto text-center"
