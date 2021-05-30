@@ -549,6 +549,8 @@ function App() {
             </div> */}
 
             <img className="my-2 h-32 w-32 mx-auto" src={sack} alt="sack" />
+            <small className="text-center">Volume data from Uniswap V3.</small>
+
             <a
               className="pb-4 underline text-sm mt-auto text-center"
               href="https://info.uniswap.org/#/tokens/0xa6610ed604047e7b76c1da288172d15bcda57596"
@@ -579,6 +581,7 @@ function App() {
               </p>
             </div> */}
             <img className="my-2 h-32 w-32 mx-auto" src={sock} alt="socks" />
+            <small className="text-center">Volume data from Uniswap V3.</small>
             <a
               className="pb-4 underline text-sm mt-auto text-center"
               href="https://info.uniswap.org/#/tokens/0x23b608675a2b2fb1890d3abbd85c5775c51691d5"
