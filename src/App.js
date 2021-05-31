@@ -584,7 +584,7 @@ function App() {
             </a>
             <a
               className="pb-4 underline text-sm mt-auto text-center"
-              href="https://etherscan.io/token/0xa6610ed604047e7b76c1da288172d15bcda57596?a=0x500dcb12218a66b4aca4cc246af1e4003d02e042"
+              href="https://etherscan.io/token/0xa6610ed604047e7b76c1da288172d15bcda57596"
             >
               View token on Etherscan
             </a>
