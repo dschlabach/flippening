@@ -332,9 +332,7 @@ function App() {
       ...socks,
       usd: socks.current_price.usd,
       mcap: socks.fully_diluted_valuation.usd,
-      totalVolume:
-        parseInt(graphFetchResults[1].pools[0].volumeUSD) +
-        parseInt(graphFetchResults[1].pools[1].volumeUSD),
+      totalVolume: graphFetchResults[2],
       oneDayVolume: parseInt(
         graphFetchResults[1].tokenDayDatas[
           graphFetchResults[1].tokenDayDatas.length - 1
@@ -369,33 +367,60 @@ function App() {
     `,
       }
     );
-    const socksGraphResults = await axios.post(
+    const socksv3 = await axios.post(
       "https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-testing",
       {
-        query: `{pools (where:{token0:"0x23b608675a2b2fb1890d3abbd85c5775c51691d5"}) {
-
-      id
-      volumeUSD
-      token0Price
-      token0 {
-        name
-      }
-      token1 {
-        name
-      }
-    }
+        query: `{
+          tokens(where: {id:"0x23b608675a2b2fb1890d3abbd85c5775c51691d5"}) {	
+          volumeUSD
+            symbol
+            name
+          }
       
       tokenDayDatas (where:{ token:"0x23b608675a2b2fb1890d3abbd85c5775c51691d5"}){
       date
         volumeUSD
         priceUSD
     } 
-    }
+  }
     `,
       }
     );
 
-    return [sacksGraphResults.data.data, socksGraphResults.data.data];
+    const socksv1 = await axios.post(
+      "https://api.thegraph.com/subgraphs/name/ianlapham/uniswap",
+      {
+        query: `{
+          exchanges(where: {tokenAddress:"0x23b608675a2b2fb1890d3abbd85c5775c51691d5"}) {	
+            tradeVolumeUSD
+            tokenName
+            
+          }
+        }
+        `,
+      }
+    );
+
+    const socksv2 = await axios.post(
+      "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2",
+      {
+        query: `{
+          tokens(where: {id:"0x23b608675a2b2fb1890d3abbd85c5775c51691d5"}) {	
+          tradeVolumeUSD
+            symbol
+            name
+          }
+        }
+        `,
+      }
+    );
+
+    let totalSocksVolume =
+      parseInt(socksv3.data.data.tokens[0].volumeUSD) +
+      parseInt(socksv2.data.data.tokens[0].tradeVolumeUSD) +
+      parseInt(socksv1.data.data.exchanges[0].tradeVolumeUSD);
+
+    return [sacksGraphResults.data.data, socksv3.data.data, totalSocksVolume];
   };
 
   const fetchData = async () => {
@@ -535,21 +560,21 @@ function App() {
               <p className="w-1/2">Market Cap: </p>
               <p className="ml-2">{formatter.format(sacks.mcap / 1000000)}M</p>
             </div>
-            <div className="flex ml-10">
+            {/* <div className="flex ml-10">
               <p className="w-1/2">24h Volume: </p>
               <p className="ml-2">
                 {formatterPrice.format(sacks.oneDayVolume)}
               </p>
-            </div>
-            {/* <div className="flex ml-10">
+            </div> */}
+            <div className="flex ml-10">
               <p className="w-1/2">Total Volume: </p>
               <p className="ml-2">
                 {formatter.format(sacks.totalVolume / 1000000)}M
               </p>
-            </div> */}
+            </div>
 
             <img className="my-2 h-32 w-32 mx-auto" src={sack} alt="sack" />
-            <small className="text-center">Volume data from Uniswap V3.</small>
+            <small className="text-center">Volume data from Uniswap v3.</small>
 
             <a
               className="pb-4 underline text-sm mt-auto text-center"
@@ -568,20 +593,22 @@ function App() {
               <p className="w-1/2">Market Cap: </p>
               <p className="ml-2">{formatter.format(socks.mcap / 1000000)}M</p>
             </div>
-            <div className="flex ml-10">
+            {/* <div className="flex ml-10">
               <p className="w-1/2">24h Volume: </p>
               <p className="ml-2">
                 {formatterPrice.format(socks.oneDayVolume)}
               </p>
-            </div>
-            {/* <div className="flex ml-10">
+            </div> */}
+            <div className="flex ml-10">
               <p className="w-1/2">Total Volume: </p>
               <p className="ml-2">
                 {formatter.format(socks.totalVolume / 1000000)}M
               </p>
-            </div> */}
+            </div>
             <img className="my-2 h-32 w-32 mx-auto" src={sock} alt="socks" />
-            <small className="text-center">Volume data from Uniswap V3.</small>
+            <small className="text-center">
+              Volume data from Uniswap (v1,v2,v3).
+            </small>
             <a
               className="pb-4 underline text-sm mt-auto text-center"
               href="https://info.uniswap.org/#/tokens/0x23b608675a2b2fb1890d3abbd85c5775c51691d5"
