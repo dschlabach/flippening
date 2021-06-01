@@ -471,6 +471,7 @@ function App() {
         activeDot={true}
         strokeWidth={4}
         tickFormatter={(number) => `$${number}`}
+        connectNulls
       />
       <Line
         type="basis"
